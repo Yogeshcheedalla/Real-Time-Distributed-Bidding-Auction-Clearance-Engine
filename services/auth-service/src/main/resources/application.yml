@@ -1,5 +1,8 @@
 server:
   port: ${PORT:8081}
+  # behind the gateway: build absolute URLs (OAuth redirect_uri) from X-Forwarded-*
+  # so Google sees http://localhost:8080/login/oauth2/code/google (the registered URI)
+  forward-headers-strategy: framework
 
 spring:
   application:

@@ -18,6 +18,9 @@ spring:
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates: [ "Path=/api/auth/**,/api/users/**,/api/admin/users/**" ]
+        - id: auth-google-oauth
+          uri: lb://AUTH-SERVICE
+          predicates: [ "Path=/oauth2/authorization/**,/login/oauth2/**" ]
         - id: auction-service
           uri: lb://AUCTION-SERVICE
           predicates: [ "Path=/api/auctions/**,/api/admin/auctions/**" ]
