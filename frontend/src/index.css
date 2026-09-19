@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { color: #e6edf7; }
+a { text-decoration: none; }
+@keyframes flashG { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.6);} 100% { box-shadow: 0 0 0 16px rgba(52,211,153,0);} }
+.flash-green { animation: flashG .8s; }
+@keyframes pop { 0% { transform: scale(.97); opacity:.4;} 100% { transform: scale(1); opacity:1;} }
+.pop { animation: pop .3s; }
+::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-thumb { background:#1e293b; border-radius:99px; }
