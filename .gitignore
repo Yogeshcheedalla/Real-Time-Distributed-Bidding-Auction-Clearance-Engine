@@ -32,3 +32,6 @@ logs/
 # Test output
 test-output/
 coverage/
+
+# Vercel CLI project link
+.vercel/
