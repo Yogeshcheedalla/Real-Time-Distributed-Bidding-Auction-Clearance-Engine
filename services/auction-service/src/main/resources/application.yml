@@ -33,6 +33,8 @@ bidvelocity:
     secret: ${JWT_SECRET:}
   clients:
     bidding: ${BIDDING_URL:}   # empty → resolve via Eureka lb
+  demo:
+    seed: ${DEMO_SEED:false}
 
 management:
   endpoints:

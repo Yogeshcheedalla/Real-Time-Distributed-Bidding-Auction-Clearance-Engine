@@ -69,6 +69,23 @@ tamper rejection, BCrypt-only persistence, state-machine 409s, duplicate-email 4
 bid replay, one-winner concurrency, anti-sniping caps, deterministic winner resolution,
 event-driven payment creation and the 100-concurrent-bidder invariants (bidding-service phase).
 
+## Demo accounts & data (development-only)
+
+Set `DEMO_SEED=true` (in `.env`) to seed, on first start, a demo catalogue (3 live +
+2 upcoming auctions, anti-sniping on) and these **development-only** accounts. Prices
+start at the true starting price — no fabricated bid history. `DEMO_SEED=false`
+(the default, and required in production) disables seeding entirely.
+
+| Role   | Email                     | Password    |
+|--------|---------------------------|-------------|
+| Admin  | admin@bidvelocity.io      | Admin@123   |
+| Seller | seller@bidvelocity.io     | Seller@123  |
+| Seller | meera@bidvelocity.io      | Seller@123  |
+| Buyer  | riya@ / vikram@ / arjun…  | Bidder@123  |
+
+These credentials exist only when `DEMO_SEED=true`. Never enable demo seeding in a
+production deployment.
+
 ## Conventions
 
 - Errors: every service answers `{timestamp,status,error,message,path,correlationId}`

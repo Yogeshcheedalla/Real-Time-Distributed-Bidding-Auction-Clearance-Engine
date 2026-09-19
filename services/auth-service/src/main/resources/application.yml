@@ -43,6 +43,8 @@ bidvelocity:
     access-minutes: ${JWT_ACCESS_MINUTES:120}
     refresh-days: ${JWT_REFRESH_DAYS:14}
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  demo:
+    seed: ${DEMO_SEED:false}
 
 management:
   endpoints:
