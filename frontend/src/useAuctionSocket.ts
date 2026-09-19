@@ -11,9 +11,12 @@ export function useAuctionSocket(auctionId: number, onEvent: (e: Record<string, 
   const cb = useRef(onEvent); cb.current = onEvent
 
   useEffect(() => {
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws'
+    const base = import.meta.env.VITE_API_BASE as string | undefined
+    const wsBase = base && /^https?:\/\//.test(base)
+      ? (base.replace(/^http/, 'ws').replace(/\/$/, ''))
+      : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`
     const client = new Client({
-      brokerURL: `${proto}://${location.host}/ws`,
+      brokerURL: `${wsBase}/ws`,
       reconnectDelay: 4000,
       onConnect: () => {
         setConnected(true)
