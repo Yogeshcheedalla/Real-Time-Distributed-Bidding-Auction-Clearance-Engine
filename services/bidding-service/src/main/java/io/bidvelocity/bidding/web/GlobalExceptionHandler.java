@@ -1,0 +1,55 @@
+package io.bidvelocity.bidding.web;
+
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ApiException.class)
+    ResponseEntity<Map<String, Object>> api(ApiException e, HttpServletRequest req) {
+        return ResponseEntity.status(e.status()).body(body(e.status().value(), e.code(), e.getMessage(), req));
+    }
+
+    /** Two concurrent requests with the same Idempotency-Key: the unique index is the final arbiter. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<Map<String, Object>> dup(DataIntegrityViolationException e, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(body(409, "DUPLICATE_REQUEST", "Duplicate idempotency key — original request is authoritative", req));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<Map<String, Object>> invalid(MethodArgumentNotValidException e, HttpServletRequest req) {
+        String msg = e.getBindingResult().getFieldErrors().stream()
+                .map(f -> f.getField() + ": " + f.getDefaultMessage()).collect(Collectors.joining("; "));
+        return ResponseEntity.badRequest().body(body(400, "VALIDATION_ERROR", msg.isEmpty() ? "Invalid request" : msg, req));
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<Map<String, Object>> unexpected(Exception e, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(body(500, "INTERNAL_ERROR", "An unexpected error occurred", req));
+    }
+
+    private Map<String, Object> body(int status, String code, String message, HttpServletRequest req) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("timestamp", Instant.now().toString());
+        m.put("status", status);
+        m.put("error", code);
+        m.put("message", message);
+        m.put("path", req.getRequestURI());
+        String cid = req.getHeader("X-Correlation-Id");
+        m.put("correlationId", cid == null ? "none" : cid);
+        return m;
+    }
+}

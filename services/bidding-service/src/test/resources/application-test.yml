@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    # H2 defaults to SNAPSHOT isolation; force READ COMMITTED so UPDATE predicates
+    # re-evaluate against committed values at lock time — the same semantics
+    # production PostgreSQL gives the CAS acceptance gate.
+    url: jdbc:h2:mem:biddingtest;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;LOCK_TIMEOUT=20000
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 30
+      connection-init-sql: SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+bidvelocity:
+  jwt:
+    secret: integration-test-secret-at-least-32-bytes!!!!
+  clients:
+    auction: ""
+
+logging:
+  level:
+    root: WARN
+    io.bidvelocity: INFO

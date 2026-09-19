@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:authtest;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+bidvelocity:
+  jwt:
+    secret: integration-test-secret-at-least-32-bytes!!!!
+    access-minutes: 30
+  frontend-url: http://localhost:5173
+
+logging:
+  level:
+    root: WARN
+    io.bidvelocity: INFO

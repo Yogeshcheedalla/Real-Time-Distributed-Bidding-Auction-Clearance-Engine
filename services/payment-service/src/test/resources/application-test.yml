@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:paytest;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+  task:
+    scheduling:
+      pool:
+        size: 1
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+bidvelocity:
+  jwt:
+    secret: integration-test-secret-at-least-32-bytes!!!!
+  clients:
+    auction: ""
+  payments:
+    poll-ms: 3600000
+    timeout-minutes: 30
+
+logging:
+  level:
+    root: WARN
+    io.bidvelocity: INFO

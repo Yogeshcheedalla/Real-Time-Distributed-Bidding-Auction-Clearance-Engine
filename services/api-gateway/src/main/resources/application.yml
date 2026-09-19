@@ -1,0 +1,55 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "${FRONTEND_URL:http://localhost:5173}"
+            allowed-methods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates: [ "Path=/api/auth/**,/api/users/**,/api/admin/users/**" ]
+        - id: auction-service
+          uri: lb://AUCTION-SERVICE
+          predicates: [ "Path=/api/auctions/**,/api/admin/auctions/**" ]
+        - id: bidding-service
+          uri: lb://BIDDING-SERVICE
+          predicates: [ "Path=/api/bids/**,/api/watchlist/**,/api/admin/bids/**" ]
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates: [ "Path=/api/payments/**,/api/admin/payments/**" ]
+        - id: realtime-ws
+          uri: lb:ws://BIDDING-SERVICE
+          predicates: [ "Path=/ws/**" ]
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+bidvelocity:
+  jwt:
+    # injected from environment; never commit a real value.
+    # The fallback is a DEV-ONLY placeholder — production/local .env must set JWT_SECRET.
+    secret: ${JWT_SECRET:dev-only-insecure-gateway-secret-change-me-32}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} [cid:%X{correlationId:-}] - %msg%n"
