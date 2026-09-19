@@ -26,6 +26,7 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(a -> a
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/auctions/**").permitAll() // marketplace browsing is public
+                .requestMatchers("/api/auctions/outbox/**").permitAll() // internal outbox poll + ack (host network only; gateway never routes it)
                 .requestMatchers("/actuator/health", "/error").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))

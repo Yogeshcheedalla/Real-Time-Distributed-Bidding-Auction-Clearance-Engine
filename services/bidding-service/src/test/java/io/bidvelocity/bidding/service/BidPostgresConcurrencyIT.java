@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
  * ladder-CAS gate exactly as three real bidding-service instances would.
  */
 @SpringBootTest
+@ActiveProfiles("test")
 @org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable(named = "BV_PG_URL", matches = ".+")
 class BidPostgresConcurrencyIT {
 
@@ -51,6 +53,7 @@ class BidPostgresConcurrencyIT {
 
         String url = System.getenv("BV_PG_URL") + (System.getenv("BV_PG_URL").contains("?") ? "&" : "?") + "currentSchema=" + SCHEMA;
         r.add("spring.datasource.url", () -> url);
+        r.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
         r.add("spring.datasource.username", () -> System.getenv("BV_PG_USER"));
         r.add("spring.datasource.password", () -> System.getenv("BV_PG_PASSWORD"));
         r.add("spring.flyway.enabled", () -> "true");
@@ -77,10 +80,12 @@ class BidPostgresConcurrencyIT {
     @Test
     void twentyFourEqualBidsExactlyOneWinsOnRealPostgres() throws Exception {
         long id = auction("LIVE", Instant.now().minusSeconds(60), Instant.now().plusSeconds(600));
+
         int n = 24;
         var pool = Executors.newFixedThreadPool(n);
         var gate = new CountDownLatch(1);
         var accepted = new AtomicInteger();
+        var dup = new AtomicInteger();
         var rejected = new AtomicInteger();
         var unexpected = new ConcurrentLinkedQueue<String>();
         var futures = new java.util.ArrayList<Future<?>>();
@@ -89,8 +94,8 @@ class BidPostgresConcurrencyIT {
             futures.add(pool.submit(() -> {
                 try {
                     gate.await();
-                    service.place(id, 3000 + k, "PG Bidder " + k, USER, new BigDecimal("1100"), "pg-race-" + id + "-" + k);
-                    accepted.incrementAndGet();
+                    var out = service.place(id, 3000 + k, "PG Bidder " + k, USER, new BigDecimal("1100"), "pg-race-" + id + "-" + k);
+                    if (out.duplicate()) { dup.incrementAndGet(); } else { accepted.incrementAndGet(); }
                 } catch (ApiException e) { rejected.incrementAndGet(); }
                 catch (Exception e) { unexpected.add(e.getClass().getSimpleName() + ":" + e.getMessage()); }
             }));

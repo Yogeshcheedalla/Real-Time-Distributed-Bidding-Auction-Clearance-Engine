@@ -29,6 +29,7 @@ public class OutboxController {
     }
 
     @PostMapping("/ack")
+    @Transactional
     public void ack(@RequestBody List<Long> ids) {
         outbox.markPublished(ids);
     }

@@ -40,15 +40,20 @@ public class BidService {
     private final SimpMessagingTemplate ws;
     private final Executor syncPool;
     private final RuntimeHydrationGuard hydrationGuard;
+    private final String jdbcUrl;
 
     @Autowired @Lazy private BidService self;   // proxy hop so the facade's ensure() runs OUTSIDE the tx
 
     public BidService(BidRepository bids, BidRuntimeRepository runtimes, AuctionClient auctionClient,
                       SimpMessagingTemplate ws, @Qualifier("syncExecutor") Executor syncPool,
-                      RuntimeHydrationGuard hydrationGuard) {
+                      RuntimeHydrationGuard hydrationGuard,
+                      @org.springframework.beans.factory.annotation.Value("${spring.datasource.url:}") String jdbcUrl) {
         this.bids = bids; this.runtimes = runtimes; this.auctionClient = auctionClient;
         this.ws = ws; this.syncPool = syncPool; this.hydrationGuard = hydrationGuard;
+        this.jdbcUrl = jdbcUrl;
     }
+
+    private boolean isH2() { return jdbcUrl.startsWith("jdbc:h2:"); }
 
     /**
      * Hot path facade. Hydration happens BEFORE the bid transaction opens:
@@ -67,6 +72,8 @@ public class BidService {
     @Transactional
     public Accepted placeTx(long auctionId, long bidderId, String bidderName, List<String> roles,
                             BigDecimal amount, String idempotencyKey) {
+        // 0. serialize every bid for this auction across all instances until commit
+        if (!isH2()) runtimes.advisoryLock(auctionId);
         // 1. idempotency replay — a retried request returns the original outcome, never a second bid
         var replay = bids.findByIdempotencyKey(idempotencyKey);
         if (replay.isPresent()) {
@@ -100,7 +107,9 @@ public class BidService {
         //    the CAS matches 0 rows → this bid is discarded with 409 (tx rollback).
         final int expectedCount = r.getBidCount();
         final int expectedExtCount = r.getExtensionCount();
-        Long previousTopBidder = r.getHighestBidId() != null ? topBidderOf(r.getHighestBidId()) : null;
+        final BigDecimal expectedPrice = r.getCurrentPrice();
+        final Long expectedHighestId = r.getHighestBidId();
+        Long previousTopBidder = expectedHighestId != null ? topBidderOf(expectedHighestId) : null;
 
         boolean extended = false;
         Instant endTimeNew = r.getEndTime();
@@ -118,7 +127,8 @@ public class BidService {
         bid.setAmount(amount); bid.setStatus("ACCEPTED"); bid.setIdempotencyKey(idempotencyKey);
         bids.saveAndFlush(bid);
 
-        int acceptedRows = runtimes.casAcceptBid(auctionId, bid.getId(), amount, endTimeNew, extCountNew, expectedExtCount, Instant.now());
+        int acceptedRows = runtimes.casAcceptBid(auctionId, bid.getId(), amount, endTimeNew, extCountNew,
+                expectedExtCount, expectedPrice, expectedHighestId, Instant.now());
         if (acceptedRows == 0) {
             // The gate is evaluated against the row's committed values at lock time.
             BidRuntime fresh = runtimes.findByAuctionId(auctionId).orElse(r);

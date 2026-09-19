@@ -21,6 +21,12 @@ spring:
         - id: auth-google-oauth
           uri: lb://AUTH-SERVICE
           predicates: [ "Path=/oauth2/authorization/**,/login/oauth2/**" ]
+          # auth-service builds Google's redirect_uri from these; must match the
+          # URI registered in Google Cloud Console exactly.
+          filters:
+            - "AddRequestHeader=X-Forwarded-Proto, http"
+            - "AddRequestHeader=X-Forwarded-Host, localhost:8080"
+            - "AddRequestHeader=X-Forwarded-Port, 8080"
         - id: auction-service
           uri: lb://AUCTION-SERVICE
           predicates: [ "Path=/api/auctions/**,/api/admin/auctions/**" ]

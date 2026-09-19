@@ -26,6 +26,7 @@ public class RuntimeHydrationGuard {
     private final BidRuntimeRepository runtimes;
     private final AuctionClient auctionClient;
     private final Inserter inserter;
+    private final java.util.concurrent.ConcurrentHashMap<Long, Object> hydrationLocks = new java.util.concurrent.ConcurrentHashMap<>();
 
     public RuntimeHydrationGuard(BidRuntimeRepository runtimes, AuctionClient auctionClient, Inserter inserter) {
         this.runtimes = runtimes; this.auctionClient = auctionClient; this.inserter = inserter;
@@ -33,13 +34,21 @@ public class RuntimeHydrationGuard {
 
     public void ensure(long auctionId) {
         if (runtimes.existsById(auctionId)) return;
-        AuctionState s;
-        try { s = auctionClient.get(auctionId); }
-        catch (Exception e) { throw new ApiException(HttpStatus.NOT_FOUND, "AUCTION_NOT_FOUND", "Auction not found or unreachable"); }
+        Object gate = hydrationLocks.computeIfAbsent(auctionId, k -> new Object());
         try {
-            inserter.insert(auctionId, s);
-        } catch (DataIntegrityViolationException lostRace) {
-            // another node inserted between exists() and our committed insert — the row exists, that's all we need
+            synchronized (gate) {   // one creator per auction per JVM; others wait, then see the committed row
+                if (runtimes.existsById(auctionId)) return;
+                AuctionState s;
+                try { s = auctionClient.get(auctionId); }
+                catch (Exception e) { throw new ApiException(HttpStatus.NOT_FOUND, "AUCTION_NOT_FOUND", "Auction not found or unreachable"); }
+                try {
+                    inserter.insert(auctionId, s);
+                } catch (DataIntegrityViolationException lostRace) {
+                    // another node inserted between exists() and our committed insert — the row exists, that's all we need
+                }
+            }
+        } finally {
+            hydrationLocks.remove(auctionId, gate);
         }
         if (!runtimes.existsById(auctionId)) {
             throw new ApiException(HttpStatus.NOT_FOUND, "AUCTION_NOT_FOUND", "Auction runtime could not be hydrated");

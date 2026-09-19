@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS outbox_events (
     id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     aggregate_id BIGINT       NOT NULL,
     topic        VARCHAR(60)  NOT NULL,
-    payload      JSONB        NOT NULL,
+    payload      TEXT         NOT NULL,
     published    BOOLEAN      NOT NULL DEFAULT FALSE,
     created_at   TIMESTAMPTZ  NOT NULL DEFAULT now()
 );

@@ -75,8 +75,26 @@ public class AuctionService {
 
     @Transactional(readOnly = true)
     public Page<AuctionDto> search(String q, String category, String status, BigDecimal min, BigDecimal max, int page, int size, org.springframework.data.domain.Sort sort) {
-        Auction.Status st = status == null || status.isBlank() ? null : Auction.Status.valueOf(status);
-        return auctions.search(blankToNull(q), blankToNull(category), st, min, max, PageRequest.of(Math.max(0, page), Math.min(50, size), sort)).map(AuctionService::toDto);
+        // Specification: predicates are only added for provided filters — no untyped
+        // null parameters ever reach PostgreSQL (Hibernate binds nulls untyped → PG
+        // infers bytea → lower(bytea) fails; H2 silently tolerated it, PG does not).
+        org.springframework.data.jpa.domain.Specification<Auction> spec = (root, cq, cb) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> ps = new java.util.ArrayList<>();
+            if (q != null && !q.isBlank()) {
+                String like = "%" + q.toLowerCase() + "%";
+                ps.add(cb.or(cb.like(cb.lower(root.get("title")), like),
+                             cb.like(cb.lower(root.get("description")), like)));
+            }
+            if (category != null && !category.isBlank()) ps.add(cb.equal(root.get("category"), category));
+            if (status != null && !status.isBlank()) {
+                if ("OPEN".equals(status)) ps.add(root.get("status").in(Auction.Status.LIVE, Auction.Status.ENDING));
+                else ps.add(cb.equal(root.get("status"), Auction.Status.valueOf(status)));
+            }
+            if (min != null) ps.add(cb.greaterThanOrEqualTo(root.get("currentPrice"), min));
+            if (max != null) ps.add(cb.lessThanOrEqualTo(root.get("currentPrice"), max));
+            return ps.isEmpty() ? cb.conjunction() : cb.and(ps.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        return auctions.findAll(spec, PageRequest.of(Math.max(0, page), Math.min(50, size), sort)).map(AuctionService::toDto);
     }
 
     @Transactional(readOnly = true)
