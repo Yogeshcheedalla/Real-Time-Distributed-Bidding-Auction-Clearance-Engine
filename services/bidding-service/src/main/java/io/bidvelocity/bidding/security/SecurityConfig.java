@@ -27,6 +27,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/api/bids/internal/**", "/actuator/health", "/error", "/ws/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bids/auction/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -46,3 +46,8 @@ management:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [payment-service] %-5level [cid:%X{correlationId:-}] %msg%n"
+
+springdoc:
+  title: BidVelocity Payment Service API
+  description: Winner invoices from WINNER_DECLARED events, payment state machine, provider abstraction
+  version: 0.1.0

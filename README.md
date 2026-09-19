@@ -6,6 +6,8 @@
 | | |
 |---|---|
 | **Live demo** | https://bidvelocity.vercel.app |
+| **API docs** | OpenAPI + Swagger UI on every service — `http://localhost:8081/swagger-ui.html` … `:8084` |
+| **Google Sign-In** | ✅ verified live round-trip (Console client `…t4nnce7j…`, callback `:8080/login/oauth2/code/google`) |
 | **Stack** | Java 21 · Spring Boot 3.5 · Spring Cloud 2025 · React 18 + TypeScript + Vite · PostgreSQL 18 · Flyway |
 | **Tests** | 44/44 unit & integration (6 modules) + 2/2 real-PostgreSQL concurrency ITs |
 | **Infra** | Native Windows — **no Docker required** |
@@ -127,6 +129,10 @@ Seller studio (create auction with validation, image URL, manage lots) · Admin 
   **100-bidder ladder strictly increasing**, projection never diverges from the durable ledger
 - Deployed Vercel bundle → cloudflared tunnel → gateway → auth: login 200 + correct
   `Access-Control-Allow-Origin` for the vercel.app origin
+- **Google Sign-In browser round-trip**: Console → accounts.google.com → callback →
+  user find-or-create → JWT fragment hand-off → "Login successful"
+- OpenAPI documents served by all four data services (`/v3/api-docs`, 27 endpoints;
+  Swagger UI at `/swagger-ui.html`)
 
 ## Testing
 

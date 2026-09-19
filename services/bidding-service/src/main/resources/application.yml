@@ -43,3 +43,8 @@ management:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [bidding-service] %-5level [cid:%X{correlationId:-}] %msg%n"
+
+springdoc:
+  title: BidVelocity Bidding Service API
+  description: Race-safe bid placement (FOR UPDATE + CAS), idempotency, anti-sniping, bid ledger, STOMP topics
+  version: 0.1.0

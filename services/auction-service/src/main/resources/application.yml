@@ -45,3 +45,8 @@ management:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [auction-service] %-5level [cid:%X{correlationId:-}] %msg%n"
+
+springdoc:
+  title: BidVelocity Auction Service API
+  description: Marketplace search, auction lifecycle state machine, scheduling, transactional outbox
+  version: 0.1.0

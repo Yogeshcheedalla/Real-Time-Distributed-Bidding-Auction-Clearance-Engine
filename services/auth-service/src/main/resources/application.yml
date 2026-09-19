@@ -59,3 +59,8 @@ logging:
   pattern:
     # correlation id + service + operation fields, no secrets/tokens ever logged
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [auth-service] %-5level [cid:%X{correlationId:-}] %msg%n"
+
+springdoc:
+  title: BidVelocity Auth Service API
+  description: Registration, login, JWT + refresh rotation, roles, Google OAuth2, admin user management
+  version: 0.1.0

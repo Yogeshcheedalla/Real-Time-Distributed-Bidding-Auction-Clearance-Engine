@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**", "/oauth2/**", "/login/**", "/actuator/health", "/error").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/**").authenticated()
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED)))
             .oauth2Login(o -> o.successHandler(googleLoginSuccessHandler))
