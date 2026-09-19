@@ -7,6 +7,7 @@ export interface Auction {
   id: number; sellerId: number; title: string; description: string; category: string; emoji: string
   startingPrice: number; currentPrice: number; minIncrement: number; reservePrice: number | null
   startTime: string; endTime: string; status: AuctionStatus
+  imageUrl?: string | null;
   antiSnipingEnabled: boolean; extensionWindowSecs: number; maxExtensions: number; extensionCount: number
   bidCount: number; highestBidId: number | null; winnerId: number | null; winningAmount: number | null
   closeReason: string | null; version: number; createdAt: string; updatedAt: string; minNextBid: number

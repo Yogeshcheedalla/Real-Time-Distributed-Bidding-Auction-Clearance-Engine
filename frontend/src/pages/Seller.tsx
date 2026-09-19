@@ -11,7 +11,7 @@ export default function Seller() {
   const user = useAuth(s => s.user)
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const [f, setF] = useState({ title: '', description: '', category: 'Electronics', emoji: '📦', startingPrice: '1000', reservePrice: '', minIncrement: '100', startTime: toLocal(new Date(Date.now() + 5 * 60000)), endTime: toLocal(new Date(Date.now() + 10 * 60000)), antiSnipe: true, extensionWindowSecs: '30', maxExtensions: '3' })
+  const [f, setF] = useState({ title: '', description: '', category: 'Electronics', emoji: '📦', imageUrl: '', startingPrice: '1000', reservePrice: '', minIncrement: '100', startTime: toLocal(new Date(Date.now() + 5 * 60000)), endTime: toLocal(new Date(Date.now() + 10 * 60000)), antiSnipe: true, extensionWindowSecs: '30', maxExtensions: '3' })
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const { data: mine } = useQuery({ queryKey: ['myauctions'], queryFn: api.myAuctions, enabled: !!user?.roles.includes('SELLER') })
@@ -27,7 +27,7 @@ export default function Seller() {
     e.preventDefault(); setErr(''); setBusy(true)
     try {
       await api.createAuction({
-        title: f.title, description: f.description, category: f.category, emoji: f.emoji,
+        title: f.title, description: f.description, category: f.category, emoji: f.emoji, imageUrl: f.imageUrl.trim() || null,
         startingPrice: Number(f.startingPrice), minIncrement: Number(f.minIncrement),
         reservePrice: f.reservePrice ? Number(f.reservePrice) : null,
         startTime: new Date(f.startTime).toISOString(), endTime: new Date(f.endTime).toISOString(),
@@ -50,6 +50,7 @@ export default function Seller() {
           <div className="grid grid-cols-3 gap-2">
             <div><label className={label}>Category</label><select className={field} value={f.category} onChange={e => up('category', e.target.value)}>{['Electronics', 'Collectibles', 'Art', 'Vehicles', 'Fashion', 'Home', 'Gadgets', 'Luxury'].map(c => <option key={c}>{c}</option>)}</select></div>
             <div><label className={label}>Emoji art</label><input className={field} value={f.emoji} onChange={e => up('emoji', e.target.value)} maxLength={4} /></div>
+            <div><label className={label}>Image URL (optional)</label><input className={field} placeholder="https://…" value={f.imageUrl} onChange={e => up('imageUrl', e.target.value)} /></div>
             <div><label className={label}>Min increment ₹</label><input className={field} type="number" min="1" value={f.minIncrement} onChange={e => up('minIncrement', e.target.value)} required /></div>
             <div><label className={label}>Starting price ₹</label><input className={field} type="number" min="1" value={f.startingPrice} onChange={e => up('startingPrice', e.target.value)} required /></div>
             <div><label className={label}>Reserve ₹ (optional)</label><input className={field} type="number" min="0" value={f.reservePrice} onChange={e => up('reservePrice', e.target.value)} /></div>

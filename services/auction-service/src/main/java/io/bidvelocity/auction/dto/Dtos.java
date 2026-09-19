@@ -11,6 +11,7 @@ public class Dtos {
             @Size(max = 4000) String description,
             @NotBlank String category,
             String emoji,
+            @Size(max = 500) String imageUrl,
             @NotNull @DecimalMin(value = "0.01") BigDecimal startingPrice,
             @NotNull @DecimalMin(value = "0.01") BigDecimal minIncrement,
             @DecimalMin(value = "0.01") BigDecimal reservePrice,
@@ -20,7 +21,7 @@ public class Dtos {
             @Min(5) @Max(120) Integer extensionWindowSeconds,
             @Min(1) @Max(10) Integer maxExtensions) {}
 
-    public record AuctionDto(Long id, Long sellerId, String title, String description, String category, String emoji,
+    public record AuctionDto(Long id, Long sellerId, String title, String description, String category, String emoji, String imageUrl,
                              BigDecimal startingPrice, BigDecimal currentPrice, BigDecimal minIncrement, BigDecimal reservePrice,
                              Instant startTime, Instant endTime, String status, boolean antiSnipingEnabled,
                              int extensionWindowSecs, int maxExtensions, int extensionCount,

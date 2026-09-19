@@ -29,7 +29,7 @@ export function AuctionCard({ a }: { a: Auction }) {
   const open = a.status === 'LIVE' || a.status === 'ENDING'
   return (
     <Link to={`/auction/${a.id}`} className="group rounded-2xl border border-line bg-panel overflow-hidden hover:border-slate-600 hover:-translate-y-1 transition">
-      <div className="h-32 grid place-items-center text-5xl" style={{ background: 'linear-gradient(135deg,#0ea5e9,#6366f1)' }}>{a.emoji}</div>
+      <div className="relative h-32 grid place-items-center text-5xl overflow-hidden" style={{ background: "linear-gradient(135deg,#0ea5e9,#6366f1)" }}>{a.emoji}{a.imageUrl && <img src={a.imageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />}</div>
       <div className="p-4 space-y-1.5">
         <div className="flex justify-between items-center">{statusChip(a.status)}<span className="text-xs text-slate-500">{a.bidCount} bids</span></div>
         <div className="font-bold truncate">{a.title}</div>

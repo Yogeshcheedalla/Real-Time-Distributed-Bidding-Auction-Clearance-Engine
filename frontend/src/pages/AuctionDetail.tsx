@@ -66,7 +66,7 @@ export default function AuctionDetail() {
 
       <div className="grid lg:grid-cols-[1.1fr_.9fr] gap-5">
         <div className="space-y-5">
-          <div className={`rounded-2xl overflow-hidden border ${a.status === 'ENDING' ? 'border-amber-400/70' : 'border-line'}`}><div className="h-72 grid place-items-center text-8xl" style={{ background: 'linear-gradient(135deg,#0ea5e9,#6366f1)' }}>{a.emoji}</div></div>
+          <div className={`rounded-2xl overflow-hidden border ${a.status === 'ENDING' ? 'border-amber-400/70' : 'border-line'}`}><div className="relative h-72 grid place-items-center text-8xl overflow-hidden" style={{ background: 'linear-gradient(135deg,#0ea5e9,#6366f1)' }}>{a.emoji}{a.imageUrl && <img src={a.imageUrl} alt={a.title} className="absolute inset-0 h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />}</div></div>
           <div className="rounded-2xl border border-line bg-panel p-5">
             <h1 className="text-xl font-extrabold m-0">{a.title}</h1>
             <p className="text-xs text-slate-500 mt-1 mb-3">by <b>{a.sellerId === user?.id ? 'you' : 'Seller ' + a.sellerId}</b> · optimistic-lock v{a.version}</p>

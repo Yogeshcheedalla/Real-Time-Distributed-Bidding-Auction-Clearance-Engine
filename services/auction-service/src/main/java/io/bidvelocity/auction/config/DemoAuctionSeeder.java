@@ -40,6 +40,15 @@ public class DemoAuctionSeeder implements CommandLineRunner {
         auctions.save(a(2L, "Yamaha NMAX 155 ABS — 2023, 4.2k km", "Single-owner NMAX 155 ABS, full service records, new rear tyre, no accidents.", "Vehicles", "🛵", "95000", "2000", null, now.plus(Duration.ofMinutes(10)), now.plus(Duration.ofMinutes(60)), Auction.Status.SCHEDULED, true, 30, 3));
         log.info("demo auction catalogue seeded (6 lots: 3 live, 2 upcoming, anti-snipe on)");
     }
+    private static final java.util.Map<String, String> IMAGES = java.util.Map.of(
+            "Leica", "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Leica_M3_mg_3628.jpg/960px-Leica_M3_mg_3628.jpg",
+            "Nikon", "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Nikon_Z_9_11_jun_2022a.jpg/960px-Nikon_Z_9_11_jun_2022a.jpg",
+            "Kashmiri", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Kashmiri-silk-carpet-knotting-bait-ul-meeras.jpg/960px-Kashmiri-silk-carpet-knotting-bait-ul-meeras.jpg",
+            "Rolex", "https://upload.wikimedia.org/wikipedia/commons/c/cd/Rolex-Submariner.jpg",
+            "NMAX", "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Yamaha_nmax_cpd150_YCP.JPG/960px-Yamaha_nmax_cpd150_YCP.JPG",
+            "Himalayan", "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Royal_Enfield_Himalayan_DB2K5442.jpg/960px-Royal_Enfield_Himalayan_DB2K5442.jpg");
+    private static String imageFor(String title) { return IMAGES.entrySet().stream().filter(e -> title.contains(e.getKey())).map(java.util.Map.Entry::getValue).findFirst().orElse(null); }
+
 
     private Auction a(Long seller, String title, String desc, String cat, String emoji,
                       String start, String inc, String reserve, Instant from, Instant to,
@@ -53,6 +62,7 @@ public class DemoAuctionSeeder implements CommandLineRunner {
         a.setReservePrice(reserve == null ? null : new BigDecimal(reserve));
         a.setStartTime(from); a.setEndTime(to); a.setStatus(status);
         a.setAntiSnipingEnabled(snipe); a.setExtensionWindowSecs(window); a.setMaxExtensions(maxExt);
+        a.setImageUrl(imageFor(title));
         return a;
     }
 }

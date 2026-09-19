@@ -36,7 +36,7 @@ class AuctionLifecycleTest {
     @MockBean BiddingClient bidding;
 
     private CreateAuctionRequest req(Instant start, Instant end) {
-        return new CreateAuctionRequest("Leica M3 Rangefinder", "mint", "Collectibles", "📷",
+        return new CreateAuctionRequest("Leica M3 Rangefinder", "mint", "Collectibles", "📷", null,
                 new BigDecimal("12000"), new BigDecimal("500"), new BigDecimal("20000"), start, end,
                 true, 30, 3);
     }
@@ -47,7 +47,7 @@ class AuctionLifecycleTest {
                 .isInstanceOf(ApiException.class).hasMessageContaining("Start time");
         assertThatThrownBy(() -> service.create(1L, req(Instant.now().plusSeconds(60), Instant.now().plusSeconds(90))))
                 .isInstanceOf(ApiException.class).hasMessageContaining("60s");
-        assertThatThrownBy(() -> service.create(1L, new CreateAuctionRequest("ok ok", "", "Art", "🖼",
+        assertThatThrownBy(() -> service.create(1L, new CreateAuctionRequest("ok ok", "", "Art", "🖼", null,
                 new BigDecimal("100"), new BigDecimal("10"), new BigDecimal("50"),
                 Instant.now().plusSeconds(60), Instant.now().plus(1, ChronoUnit.HOURS), true, 30, 3)))
                 .isInstanceOf(ApiException.class).hasMessageContaining("Reserve");

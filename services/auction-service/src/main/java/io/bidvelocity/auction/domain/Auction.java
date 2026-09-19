@@ -18,6 +18,7 @@ public class Auction {
     @Column(nullable = false) private String description = "";
     @Column(nullable = false) private String category;
     @Column(nullable = false) private String emoji = "📦";
+    @Column(name = "image_url") private String imageUrl;
 
     @Column(name = "starting_price", nullable = false, precision = 14, scale = 2) private BigDecimal startingPrice;
     @Column(name = "current_price", nullable = false, precision = 14, scale = 2) private BigDecimal currentPrice;
@@ -58,6 +59,7 @@ public class Auction {
     public String getDescription() { return description; } public void setDescription(String v) { description = v; }
     public String getCategory() { return category; } public void setCategory(String v) { category = v; }
     public String getEmoji() { return emoji; } public void setEmoji(String v) { emoji = v; }
+    public String getImageUrl() { return imageUrl; } public void setImageUrl(String v) { imageUrl = v; }
     public BigDecimal getStartingPrice() { return startingPrice; } public void setStartingPrice(BigDecimal v) { startingPrice = v; }
     public BigDecimal getCurrentPrice() { return currentPrice; } public void setCurrentPrice(BigDecimal v) { currentPrice = v; }
     public BigDecimal getMinIncrement() { return minIncrement; } public void setMinIncrement(BigDecimal v) { minIncrement = v; }

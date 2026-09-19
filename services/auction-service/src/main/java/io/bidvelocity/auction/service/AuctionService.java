@@ -58,6 +58,7 @@ public class AuctionService {
         a.setDescription(r.description() == null ? "" : r.description().trim());
         a.setCategory(r.category());
         a.setEmoji(r.emoji() == null ? "📦" : r.emoji());
+        a.setImageUrl(r.imageUrl());
         a.setStartingPrice(r.startingPrice());
         a.setCurrentPrice(r.startingPrice());
         a.setMinIncrement(r.minIncrement());
@@ -247,7 +248,7 @@ public class AuctionService {
     private static String blankToNull(String s) { return s == null || s.isBlank() ? null : s; }
 
     public static AuctionDto toDto(Auction a) {
-        return new AuctionDto(a.getId(), a.getSellerId(), a.getTitle(), a.getDescription(), a.getCategory(), a.getEmoji(),
+        return new AuctionDto(a.getId(), a.getSellerId(), a.getTitle(), a.getDescription(), a.getCategory(), a.getEmoji(), a.getImageUrl(),
                 a.getStartingPrice(), a.getCurrentPrice(), a.getMinIncrement(), a.getReservePrice(),
                 a.getStartTime(), a.getEndTime(), a.getStatus().name(), a.isAntiSnipingEnabled(),
                 a.getExtensionWindowSecs(), a.getMaxExtensions(), a.getExtensionCount(),
