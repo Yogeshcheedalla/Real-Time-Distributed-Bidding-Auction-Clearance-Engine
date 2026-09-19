@@ -28,6 +28,17 @@ application-local.yml
 # Logs & runtime
 *.log
 logs/
+hs_err_pid*
+replay_pid*
+*.pid
+
+# Tooling temp files
+.eslintcache
+vite.config.ts.timestamp*
+*.tsbuildinfo
+cloudflared.exe
+.npm/
+.mvn/wrapper/maven-wrapper.properties.local
 
 # Test output
 test-output/
