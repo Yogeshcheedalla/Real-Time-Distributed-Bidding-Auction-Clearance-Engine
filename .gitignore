@@ -1,0 +1,34 @@
+# Build
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Secrets & local config — NEVER commit
+.env
+.env.local
+*.env.local
+application-local.yml
+*.jks
+*.p12
+*.pem
+
+# Logs & runtime
+*.log
+logs/
+
+# Test output
+test-output/
+coverage/
