@@ -37,6 +37,23 @@ class JwtValidationFilterTest {
     }
 
     @Test
+    void publicGetAuctionsPassesWithoutToken() {
+        var chain = new RecordingChain();
+        filter.filter(exchange("/api/auctions", null), chain).block();
+        assertThat(chain.seen).as("anonymous marketplace browsing reaches the service").isNotNull();
+        assertThat(chain.seen.getRequest().getHeaders().getFirst("X-User-Id")).isNull();
+    }
+
+    @Test
+    void writeAuctionsRequiresToken() {
+        var chain = new RecordingChain();
+        var ex = MockServerWebExchange.from(MockServerHttpRequest.post("/api/auctions").build());
+        filter.filter(ex, chain).block();
+        assertThat(chain.seen).as("POST without token is blocked at the edge").isNull();
+        assertThat(ex.getResponse().getStatusCode().value()).isEqualTo(401);
+    }
+
+    @Test
     void validTokenInjectsIdentityAndStripsForgedHeaders() {
         var chain = new RecordingChain();
         filter.filter(exchange("/api/bids", "Bearer " + token(60_000)), chain).block();

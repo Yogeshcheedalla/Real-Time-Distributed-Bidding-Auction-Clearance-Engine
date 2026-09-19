@@ -37,6 +37,11 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
             "/actuator/health", "/eureka/", "/ws/"
     );
 
+    /** Anonymous READS allowed at the edge (marketplace browsing); writes always need JWT. */
+    private static final List<String> PUBLIC_GET_PREFIXES = List.of(
+            "/api/auctions", "/api/bids/auction/"
+    );
+
     private final SecretKey key;
 
     public JwtValidationFilter(@Value("${bidvelocity.jwt.secret}") String secret) {
@@ -53,7 +58,7 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-        if (isPublic(path)) {
+        if (isPublic(request)) {
             return chain.filter(stripped(exchange));
         }
         String header = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
@@ -75,8 +80,11 @@ public class JwtValidationFilter implements GlobalFilter, Ordered {
         }
     }
 
-    private boolean isPublic(String path) {
-        return PUBLIC_PREFIXES.stream().anyMatch(path::startsWith);
+    private boolean isPublic(ServerHttpRequest request) {
+        String path = request.getURI().getPath();
+        if (PUBLIC_PREFIXES.stream().anyMatch(path::startsWith)) return true;
+        return request.getMethod() == org.springframework.http.HttpMethod.GET
+                && PUBLIC_GET_PREFIXES.stream().anyMatch(path::startsWith);
     }
 
     /** always remove client-supplied identity headers to prevent forgery */
