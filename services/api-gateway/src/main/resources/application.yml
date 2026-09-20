@@ -21,12 +21,14 @@ spring:
         - id: auth-google-oauth
           uri: lb://AUTH-SERVICE
           predicates: [ "Path=/oauth2/authorization/**,/login/oauth2/**" ]
-          # auth-service builds Google's redirect_uri from these; must match the
-          # URI registered in Google Cloud Console exactly.
+          # SetRequestHeader (not Add): cloudflared/vite may already send X-Forwarded-Host
+          # with their own value — Add appends and Spring takes the foreign one, producing
+          # a redirect_uri Google never registered (400 redirect_uri_mismatch).
+          # Set forces the exact Console-registered origin from every entry path.
           filters:
-            - "AddRequestHeader=X-Forwarded-Proto, http"
-            - "AddRequestHeader=X-Forwarded-Host, localhost:8080"
-            - "AddRequestHeader=X-Forwarded-Port, 8080"
+            - "SetRequestHeader=X-Forwarded-Proto, http"
+            - "SetRequestHeader=X-Forwarded-Host, localhost:8080"
+            - "SetRequestHeader=X-Forwarded-Port, 8080"
         - id: auction-service
           uri: lb://AUCTION-SERVICE
           predicates: [ "Path=/api/auctions/**,/api/admin/auctions/**" ]
