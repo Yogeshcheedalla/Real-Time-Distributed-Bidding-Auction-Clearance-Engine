@@ -42,7 +42,7 @@ eureka:
 
 bidvelocity:
   jwt:
-    secret: ${JWT_SECRET:}
+    secret: ${JWT_SECRET:dev-only-insecure-gateway-secret-change-me-32}
     access-minutes: ${JWT_ACCESS_MINUTES:120}
     refresh-days: ${JWT_REFRESH_DAYS:14}
   frontend-url: ${FRONTEND_URL:http://localhost:5173}

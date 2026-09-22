@@ -100,7 +100,7 @@ public class BidService {
         BigDecimal min = r.minNextBid();
         if (amount.compareTo(min) < 0)
             throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_BID",
-                    "Bid must be greater than or equal to " + min.toPlainString() + " (current " + r.getCurrentPrice() + " + increment " + r.getMinIncrement() + ")");
+                    "Bid must be higher than the current bid — minimum " + min.toPlainString() + " (current ₹" + r.getCurrentPrice().toPlainString() + ")");
 
         // 3. atomic commit: save the bid row, then compare-and-swap the runtime top.
         //    If another bid installed itself between our validation and the swap,

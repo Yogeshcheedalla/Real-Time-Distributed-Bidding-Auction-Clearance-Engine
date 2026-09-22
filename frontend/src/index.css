@@ -9,3 +9,19 @@ a { text-decoration: none; }
 @keyframes pop { 0% { transform: scale(.97); opacity:.4;} 100% { transform: scale(1); opacity:1;} }
 .pop { animation: pop .3s; }
 ::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-thumb { background:#1e293b; border-radius:99px; }
+
+/* ---- live-auction HUD: LED pop, alarms, glow, hover ---- */
+@keyframes ledPop { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(56,189,248,0)); } 35% { transform: scale(1.14); filter: drop-shadow(0 0 18px rgba(56,189,248,.9)); color:#7dd3fc; } 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(56,189,248,0)); } }
+.led-pop { animation: ledPop .7s ease-out; display:inline-block; }
+@keyframes alarmFlash { 0%,100% { background: rgba(244,63,94,.14); border-color: rgba(244,63,94,.5); } 50% { background: rgba(244,63,94,.30); border-color: rgba(244,63,94,.95); box-shadow: 0 0 22px rgba(244,63,94,.55);} }
+.alarm-banner { animation: alarmFlash 1s infinite; }
+@keyframes blink { 0%,49%{opacity:1;} 50%,100%{opacity:.25;} }
+.blink-critical { animation: blink 1s step-end infinite; }
+.glow { text-shadow: 0 0 14px rgba(56,189,248,.55); }
+@keyframes ledBlink { 0%,100%{ box-shadow:0 0 0 0 rgba(52,211,153,.7);} 50%{ box-shadow:0 0 0 7px rgba(52,211,153,0);} }
+.led-live { animation: ledBlink 1.4s infinite; }
+.hover-lift { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(2,6,23,.55); border-color: rgba(56,189,248,.5); }
+.btn-led { position: relative; transition: transform .12s ease, box-shadow .2s ease; }
+.btn-led:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 0 22px rgba(99,102,241,.7), 0 0 44px rgba(14,165,233,.35); }
+.btn-led:active { transform: scale(.97); }

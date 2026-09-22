@@ -26,7 +26,7 @@ public class BidRuntime {
     @Column(name = "updated_at", nullable = false) private Instant updatedAt = Instant.now();
 
     public BigDecimal minNextBid() {
-        return highestBidId == null ? startingPrice : currentPrice.add(minIncrement);
+        return highestBidId == null ? startingPrice : currentPrice.add(BigDecimal.ONE);
     }
     public boolean acceptsBids() {
         return ("LIVE".equals(status) || "ENDING".equals(status)) && endTime.isAfter(Instant.now());

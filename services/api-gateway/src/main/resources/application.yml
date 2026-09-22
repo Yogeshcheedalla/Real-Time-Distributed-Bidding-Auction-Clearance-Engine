@@ -26,9 +26,9 @@ spring:
           # a redirect_uri Google never registered (400 redirect_uri_mismatch).
           # Set forces the exact Console-registered origin from every entry path.
           filters:
-            - "SetRequestHeader=X-Forwarded-Proto, http"
-            - "SetRequestHeader=X-Forwarded-Host, localhost:8080"
-            - "SetRequestHeader=X-Forwarded-Port, 8080"
+            - "SetRequestHeader=X-Forwarded-Proto, ${OAUTH_PROTO:http}"
+            - "SetRequestHeader=X-Forwarded-Host, ${OAUTH_HOST:localhost:8080}"
+            - "SetRequestHeader=X-Forwarded-Port, ${OAUTH_PORT:8080}"
         - id: auction-service
           uri: lb://AUCTION-SERVICE
           predicates: [ "Path=/api/auctions/**,/api/admin/auctions/**" ]

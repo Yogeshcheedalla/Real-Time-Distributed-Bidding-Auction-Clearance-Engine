@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, money, uuid } from '../api'
@@ -39,6 +39,17 @@ export default function AuctionDetail() {
     return buckets.map(v => v / mx)
   }, [a, bids])
 
+  const prevTop = useRef(false)
+  useEffect(() => {
+    if (prevTop.current && !iAmTop && user) setToast({ msg: '🔔 You have been OUTBID — place a higher bid!', kind: 'err' })
+    prevTop.current = iAmTop
+  }, [iAmTop])
+  const velocity = useMemo(() => {
+    if (!bids?.length) return 0
+    const cutoff = Date.now() - 60_000
+    return bids.filter(b => +new Date(b.at) >= cutoff).length
+  }, [bids])
+
   if (!a) return <main className="max-w-6xl mx-auto p-10 text-slate-500">Loading auction… (is the auction service up? scripts\start-auction.bat)</main>
 
   const submit = async () => {
@@ -61,7 +72,17 @@ export default function AuctionDetail() {
           <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${connected ? 'bg-good animate-pulse' : 'bg-slate-500'}`} />
           {connected ? 'LIVE FEED' : 'polling (socket down)'}
         </span>
-        <button className="ml-auto px-3 py-1 rounded-lg border border-line text-slate-300" onClick={() => { navigator.clipboard.writeText(location.href) }}>🔗 Share</button>
+        <button className="ml-auto px-3 py-1 rounded-lg border border-line text-slate-300 hover:border-acc hover:text-white transition" onClick={() => { navigator.clipboard.writeText(location.href) }}>🔗 Share</button>
+      </div>
+
+      {a.status === 'ENDING' && <div className="alarm-banner mb-4 rounded-xl border px-4 py-2 text-center font-extrabold tracking-wide text-rose-200">🚨 FINAL MINUTE — BIDDING CLOSING · ANTI-SNIPE ARMED</div>}
+
+      <div className="mb-5 rounded-2xl border border-line bg-panel/60 px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <span className="flex items-center gap-2 font-extrabold text-sm"><span className={`w-2.5 h-2.5 rounded-full ${connected ? 'bg-good led-live' : 'bg-slate-500'}`} />{connected ? 'LIVE' : 'OFFLINE'}</span>
+        <div><div className="text-[10px] text-slate-500 font-bold">BIDS</div><div className="font-extrabold tabular-nums">{a.bidCount}</div></div>
+        <div><div className="text-[10px] text-slate-500 font-bold">VELOCITY</div><div className={`font-extrabold tabular-nums ${velocity >= 5 ? 'text-rose-300' : 'text-slate-200'}`}>{velocity}/min {velocity >= 5 ? '🔥' : ''}</div></div>
+        <div><div className="text-[10px] text-slate-500 font-bold">TOP BID</div><div className="font-extrabold tabular-nums glow">{money(a.currentPrice)}</div></div>
+        <div className="ml-auto text-right"><div className="text-[10px] text-slate-500 font-bold">TIME LEFT</div><div className={`text-lg font-extrabold tabular-nums ${a.status === 'ENDING' ? 'text-rose-300 blink-critical' : ''}`}><Countdown end={a.status === 'SCHEDULED' ? a.startTime : a.endTime} /></div></div>
       </div>
 
       <div className="grid lg:grid-cols-[1.1fr_.9fr] gap-5">
@@ -85,7 +106,7 @@ export default function AuctionDetail() {
         <div className="space-y-5">
           <div className={`rounded-2xl border p-5 ${a.status === 'ENDING' ? 'border-amber-400/70 animate-pulse' : 'border-line'} bg-panel`}>
             <div className="text-xs text-slate-500 font-bold">CURRENT HIGHEST BID</div>
-            <div className={`text-4xl font-extrabold ${a.status === 'ENDING' ? 'text-amber-300' : ''}`} key={a.currentPrice}>{money(a.currentPrice)}</div>
+            <div className={`text-4xl font-extrabold led-pop glow ${a.status === 'ENDING' ? 'text-amber-300' : ''}`} key={a.currentPrice}>{money(a.currentPrice)}</div>
             {iAmTop && <div className="text-good text-sm font-bold">🫵 You are the top bidder</div>}
             <div className="flex justify-between items-center mt-3">
               <span className="text-xs text-slate-500 font-bold">{a.status === 'SCHEDULED' ? 'STARTS IN' : 'TIME REMAINING'}</span>
@@ -101,20 +122,24 @@ export default function AuctionDetail() {
               <h3 className="font-bold m-0 mb-2">Place your bid</h3>
               <div className="flex gap-2">
                 <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="flex-1 bg-slate-800/60 border border-line rounded-xl px-3 py-2.5 font-bold outline-none focus:border-acc" />
-                <button onClick={submit} className="px-5 py-2.5 rounded-xl font-extrabold bg-gradient-to-r from-acc to-acc2 text-ink">BID NOW</button>
+                <button onClick={submit} className="px-5 py-2.5 rounded-xl font-extrabold bg-gradient-to-r from-acc to-acc2 text-ink btn-led">BID NOW</button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {[1, 10, 100].map(d => <button key={d} onClick={() => setAmount(String(Number(a.currentPrice) + d))} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-line text-slate-300 hover:border-acc hover:text-white hover-lift">+ {money(d)}</button>)}
+                <button onClick={() => setAmount(String(Number(a.currentPrice) + Number(a.minIncrement)))} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-line text-slate-300 hover:border-acc hover:text-white hover-lift">+ {money(a.minIncrement)} step</button>
               </div>
               <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
-                <div className="rounded-lg bg-slate-800/40 p-2.5"><div className="text-slate-500">Minimum acceptable</div><b className="text-sm">{money(a.minNextBid)}</b></div>
-                <div className="rounded-lg bg-slate-800/40 p-2.5"><div className="text-slate-500">Next clean bid</div><b className="text-sm">{money(a.minNextBid + Number(a.minIncrement))}</b></div>
+                <div className="rounded-lg bg-slate-800/40 p-2.5"><div className="text-slate-500">Current bid</div><b className="text-sm">{money(a.currentPrice)}</b></div>
+                <div className="rounded-lg bg-slate-800/40 p-2.5"><div className="text-slate-500">Minimum next</div><b className="text-sm">{money(a.minNextBid)}</b></div>
               </div>
-              <p className="text-[11px] text-slate-500 mt-3 mb-0">💡 Every submit carries an idempotency key — double-clicks cannot create two bids.</p>
+              <p className="text-[11px] text-slate-500 mt-3 mb-0">💡 Any bid above the current price is valid — even +₹1. Double-clicks can't create two bids (idempotency key).</p>
             </div>
           ) : !user && <div className="rounded-2xl border border-line bg-panel p-5 text-sm text-slate-400"><Link to="/login" className="text-acc font-bold">Sign in</Link> to bid when this auction opens.</div>}
 
           <div className="rounded-2xl border border-line bg-panel p-5">
             <h3 className="font-bold m-0 mb-2">Live bid activity</h3>
             {recent.length ? recent.map((b: Bid) => (
-              <div key={b.id} className={`flex justify-between py-2 px-2.5 rounded-lg text-sm border-b border-line/50 ${b.bidderId === user?.id ? 'bg-cyan-400/5 outline outline-1 outline-cyan-400/30' : ''}`}>
+              <div key={b.id} className={`hover-lift flex justify-between py-2 px-2.5 rounded-lg text-sm border-b border-line/50 ${b.bidderId === user?.id ? 'bg-cyan-400/5 outline outline-1 outline-cyan-400/30' : ''}`}>
                 <span>{b.bidderId === user?.id ? '🫵 ' : ''}{b.bidderName} <span className="text-slate-600 text-xs">· {new Date(b.at).toLocaleTimeString()}</span></span>
                 <b className="tabular-nums">{money(b.amount)}</b>
               </div>

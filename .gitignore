@@ -46,3 +46,8 @@ coverage/
 
 # Vercel CLI project link
 .vercel/
+
+# IDE metadata (Eclipse / Spring Tools Suite)
+.classpath
+.project
+.settings/

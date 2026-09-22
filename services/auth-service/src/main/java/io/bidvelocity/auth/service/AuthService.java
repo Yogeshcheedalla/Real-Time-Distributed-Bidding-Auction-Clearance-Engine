@@ -134,6 +134,23 @@ public class AuthService {
         return u;
     }
 
+    /**
+     * Upgrade the current logged-in user to SELLER (idempotent). Google sign-in only
+     * ever grants USER, so this is the explicit "Start Selling" action. Returns a fresh
+     * AuthResponse whose JWT now carries the SELLER authority so the client can re-render.
+     */
+    @Transactional
+    public AuthResponse becomeSeller(long userId) {
+        User u = users.findById(userId).orElseThrow(() -> ApiException.notFound("User"));
+        boolean hasSeller = u.getRoles().stream().anyMatch(r -> "SELLER".equals(r.getName()));
+        if (!hasSeller) {
+            Role seller = roles.findByName("SELLER").orElseThrow(() -> new IllegalStateException("role seed missing: SELLER"));
+            u.getRoles().add(seller);
+            users.save(u);
+        }
+        return issueFor(u);
+    }
+
     private String newRandomString() {
         byte[] b = new byte[24]; random.nextBytes(b);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(b);

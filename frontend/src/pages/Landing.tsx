@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { api, money } from '../api'
@@ -19,10 +20,16 @@ export const statusChip = (s: Auction['status']) => {
 }
 
 export function Countdown({ end }: { end: string }) {
-  const ms = Math.max(0, +new Date(end) - Date.now())
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    setNow(Date.now())
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [end])
+  const ms = Math.max(0, +new Date(end) - now)
   const s = Math.floor(ms / 1000)
   const t = `${s >= 3600 ? String(Math.floor(s / 3600)).padStart(2, '0') + ':' : ''}${String(Math.floor(s % 3600 / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-  return <span className={`font-bold tabular-nums ${s > 0 && s < 60 ? 'text-bad' : ''}`}>{t}</span>
+  return <span className={`font-bold tabular-nums ${s > 0 && s < 60 ? 'text-bad blink-critical' : ''}`}>{t}</span>
 }
 
 export function AuctionCard({ a }: { a: Auction }) {
@@ -58,7 +65,7 @@ export default function Landing() {
           <p className="mt-5 text-slate-400 max-w-md"><b className="text-slate-200">Bid faster. Compete fairly. Win confidently.</b><br />Gateway-routed microservices, race-safe bidding, deterministic winner resolution, anti-sniping and event-driven settlement.</p>
           <div className="mt-7 flex gap-3">
             <Link to="/auctions" className="px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-acc to-acc2 text-ink">Explore Live Auctions</Link>
-            <Link to="/register" className="px-6 py-3 rounded-xl font-bold border border-slate-600 text-slate-200 hover:bg-slate-800">Start Selling</Link>
+            <Link to="/seller" className="px-6 py-3 rounded-xl font-bold border border-slate-600 text-slate-200 hover:bg-slate-800">Start Selling</Link>
           </div>
         </div>
         <div className="rounded-2xl border border-line bg-panel p-5">

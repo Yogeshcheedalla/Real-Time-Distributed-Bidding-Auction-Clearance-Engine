@@ -8,6 +8,7 @@ interface AuthState {
   init: () => Promise<void>
   login: (email: string, password: string) => Promise<User>
   register: (b: { firstName: string; lastName: string; email: string; password: string; role: string }) => Promise<User>
+  becomeSeller: () => Promise<User>
   logout: () => void
 }
 
@@ -27,6 +28,12 @@ export const useAuth = create<AuthState>((set) => ({
   },
   async register(b) {
     const r = await api.register({ ...b, termsAccepted: true })
+    localStorage.setItem('bv.token', r.accessToken)
+    set({ user: r.user })
+    return r.user
+  },
+  async becomeSeller() {
+    const r = await api.becomeSeller()
     localStorage.setItem('bv.token', r.accessToken)
     set({ user: r.user })
     return r.user

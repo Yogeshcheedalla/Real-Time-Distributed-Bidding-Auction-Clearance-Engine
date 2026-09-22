@@ -9,15 +9,24 @@ const toLocal = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 6000
 
 export default function Seller() {
   const user = useAuth(s => s.user)
+  const becomeSeller = useAuth(s => s.becomeSeller)
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [f, setF] = useState({ title: '', description: '', category: 'Electronics', emoji: '📦', imageUrl: '', startingPrice: '1000', reservePrice: '', minIncrement: '100', startTime: toLocal(new Date(Date.now() + 5 * 60000)), endTime: toLocal(new Date(Date.now() + 10 * 60000)), antiSnipe: true, extensionWindowSecs: '30', maxExtensions: '3' })
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [activating, setActivating] = useState(false)
   const { data: mine } = useQuery({ queryKey: ['myauctions'], queryFn: api.myAuctions, enabled: !!user?.roles.includes('SELLER') })
 
   if (!user) return <main className="max-w-5xl mx-auto p-16 text-center"><Link to="/login" className="text-acc font-bold">Sign in →</Link></main>
-  if (!user.roles.includes('SELLER')) return <main className="max-w-5xl mx-auto p-16 text-center"><h2>Seller account required</h2><p className="text-slate-400">Register a seller account or sign in with the demo seller.</p><Link to="/register" className="text-acc font-bold">Open seller account →</Link></main>
+  if (!user.roles.includes('SELLER')) return <main className="max-w-2xl mx-auto p-16 text-center">
+    <h2 className="text-2xl font-extrabold mb-2">Start selling on BidVelocity</h2>
+    <p className="text-slate-400 mb-6">You're signed in as <b className="text-slate-200">{user.email}</b>. Activate your seller account to create and schedule auctions — it's free and instant.</p>
+    {err && <p className="text-rose-300 text-sm mb-4">⛔ {err}</p>}
+    <button disabled={activating} onClick={async () => { setErr(''); setActivating(true); try { await becomeSeller() } catch (ex) { setErr((ex as Error).message) } finally { setActivating(false) } }}
+      className="px-6 py-3 rounded-xl font-extrabold bg-gradient-to-r from-acc to-acc2 text-ink disabled:opacity-50">{activating ? 'Activating…' : 'ACTIVATE SELLING →'}</button>
+    <p className="text-[11px] text-slate-600 mt-4">Already a seller elsewhere? <Link to="/login" className="text-acc font-bold">Sign in with that account</Link></p>
+  </main>
 
   const up = (k: string, v: string | boolean) => setF(s => ({ ...s, [k]: v }))
   const field = 'w-full mt-1 bg-slate-800/60 border border-line rounded-xl px-3 py-2 outline-none focus:border-acc text-sm'

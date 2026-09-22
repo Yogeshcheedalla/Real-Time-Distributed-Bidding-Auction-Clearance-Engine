@@ -40,6 +40,10 @@ class AuthController {
     @GetMapping("/users/me")
     UserDto me(@AuthenticationPrincipal AuthPrincipal p) { return auth.me(p.id()); }
 
+    /** "Start Selling": upgrade the signed-in user to SELLER and return a fresh JWT. */
+    @PostMapping("/users/me/seller")
+    AuthResponse becomeSeller(@AuthenticationPrincipal AuthPrincipal p) { return auth.becomeSeller(p.id()); }
+
     @GetMapping("/admin/users")
     @PreAuthorize("hasAuthority('ADMIN')")
     List<UserDto> adminUsers() { return auth.listAll(); }

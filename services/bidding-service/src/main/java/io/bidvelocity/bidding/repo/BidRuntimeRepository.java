@@ -36,7 +36,7 @@ public interface BidRuntimeRepository extends JpaRepository<BidRuntime, Long> {
            AND r.currentPrice = :expectedPrice
            AND ((r.highestBidId IS NULL AND :expectedHighestId IS NULL) OR r.highestBidId = :expectedHighestId)
            AND :amount >= CASE WHEN r.highestBidId IS NULL THEN r.startingPrice
-                                ELSE r.currentPrice + r.minIncrement END
+                                ELSE r.currentPrice + 1 END
         """)
     int casAcceptBid(@Param("id") Long auctionId, @Param("bidId") Long bidId, @Param("amount") java.math.BigDecimal amount,
                      @Param("endTime") java.time.Instant endTime, @Param("extCount") int extCount,
